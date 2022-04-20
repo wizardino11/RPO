@@ -1,9 +1,19 @@
 package ru.iu3.fclient;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.widget.Toast;
+
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 
 import java.util.Random;
 
@@ -19,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private ActivityMainBinding binding;
+    ActivityResultLauncher activityResultLauncher;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +57,37 @@ public class MainActivity extends AppCompatActivity {
         // Example of a call to a native method
         TextView tv = binding.sampleText;
         tv.setText(stringFromJNI());
+
+        binding.button.setOnClickListener(view -> {
+            Intent it = new Intent(this, PinpadActivity.class);
+//            startActivity(it);
+            activityResultLauncher.launch(it);
+        });
+
+        activityResultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult(),
+                new ActivityResultCallback() {
+                    @Override
+                    public void onActivityResult(Object result) {
+                        ActivityResult res = (ActivityResult) result;
+                        if (res.getResultCode() == Activity.RESULT_OK) {
+                            Intent data = res.getData();
+// обработка результата
+                            String pin = data.getStringExtra("pin");
+                            Toast.makeText(MainActivity.this, pin, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+    }
+
+    public static byte[] stringToHex(String s) {
+        byte[] hex;
+        try {
+            hex = Hex.decodeHex(s.toCharArray());
+        } catch (DecoderException ex) {
+            hex = null;
+        }
+        return hex;
     }
 
     /**
