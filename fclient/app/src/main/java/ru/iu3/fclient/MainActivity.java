@@ -65,6 +65,7 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
         byte[] decrypt_data = decrypt(keys, encrypt_data);
 
         // Example of a call to a native method
+
         TextView tv = binding.sampleText;
         tv.setText(stringFromJNI());
 
@@ -76,20 +77,20 @@ public class MainActivity extends AppCompatActivity implements TransactionEvents
 
             // 3 lab
 
-   //         new Thread(() -> {
-  //              try {
-   //                 byte[] trd = stringToHex("9F0206000000000100");
-  //                  transaction(trd);
-  //              } catch (Exception exception) {
-  //                  Log.println(Log.ERROR, "MtLog", Arrays.toString(exception.getStackTrace()));
-   //             }
- //           }).start();
-//
+            //new Thread(() -> {
+                //try {
+                   // byte[] trd = stringToHex("9F0206000000000100");
+                  //  transaction(trd);
+                //} catch (Exception exception) {
+               //     Log.println(Log.ERROR, "MtLog", Arrays.toString(exception.getStackTrace()));
+             //   }
+           // }).start();
+
 
 
             // 4 lab
 
-            testHttpClient();
+        testHttpClient();
         });
 
         activityResultLauncher = registerForActivityResult(

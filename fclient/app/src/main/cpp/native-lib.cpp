@@ -164,6 +164,7 @@ Java_ru_iu3_fclient_MainActivity_decrypt(JNIEnv *env, jclass clazz, jbyteArray k
 
 extern "C"
 JNIEXPORT jboolean JNICALL
+
 Java_ru_iu3_fclient_MainActivity_transaction(JNIEnv *xenv, jobject xthiz, jbyteArray xtrd) {
     jobject thiz = xenv->NewGlobalRef(xthiz);
     jbyteArray trd = (jbyteArray)xenv->NewGlobalRef(xtrd);
