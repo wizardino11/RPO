@@ -20,6 +20,7 @@ import java.util.*;
 /**
  * Метод, который отражает логику работы таблицы артистов
  */
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1")
 public class ArtistsController {

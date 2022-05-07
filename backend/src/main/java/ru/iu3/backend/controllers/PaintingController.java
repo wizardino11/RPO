@@ -1,3 +1,4 @@
+package ru.iu3.backend.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +21,7 @@ import java.util.*;
  * Класс - контроллер модели картин
  * Класс - контроллер картин
  */
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequestMapping("api/v1")
 public class PaintingController {
