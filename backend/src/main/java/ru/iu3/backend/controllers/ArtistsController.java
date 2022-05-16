@@ -11,6 +11,13 @@ import ru.iu3.backend.models.Museum;
 import ru.iu3.backend.repositories.ArtistRepository;
 import ru.iu3.backend.repositories.CountryRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+
+import org.springframework.validation.annotation.Validated;
+import ru.iu3.backend.tools.DataValidationException;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,8 +43,16 @@ public class ArtistsController {
      * @return - список артистов, который представлен в JSON
      */
     @GetMapping("/artists")
-    public List getAllCountries() {
-        return artistsRepository.findAll();
+    public Page<Artists> getAllArtists(@RequestParam("page") int page, @RequestParam("limit") int limit) {
+        return artistsRepository.findAll(PageRequest.of(page, limit, Sort.by(Sort.Direction.ASC, "name")));
+    }
+
+    @GetMapping("/artists/{id}")
+    public ResponseEntity getArtist(@PathVariable(value = "id") Long artistId) throws DataValidationException {
+        Artists artists = artistsRepository.findById(artistId).
+                orElseThrow(() -> new DataValidationException("Художник с таким индексом не найден"));
+        return ResponseEntity.ok(artists);
+
     }
 
     /**
@@ -66,26 +81,22 @@ public class ArtistsController {
     @PostMapping("/artists")
     public ResponseEntity<Object> createArtist(@RequestBody Artists artists) throws Exception {
         try {
-            // Извлекаем самостоятельно страну из пришедших данных
-            Optional<Country> cc = countryRepository.findById(artists.countryid.id);
-            if (cc.isPresent()) {
-                artists.countryid = cc.get();
-            }
-            // Формируем новый объект класса Artists и сохраняем его в репозиторий
-            Artists nc = artistsRepository.save(artists);
-            return new ResponseEntity<Object>(nc, HttpStatus.OK);
+            // Попытка сохранить что-либо в базу данных
+            Artists newArtists = artistsRepository.save(artists);
+            return new ResponseEntity<Object>(newArtists, HttpStatus.OK);
         } catch (Exception exception) {
-            // Указываем тип ошибки
-            String error;
-            if (exception.getMessage().contains("ConstraintViolationException")) {
-                error = "artistAlreadyExists";
+            if (exception.getMessage().contains("artists.name_UNIQUE")) {
+                throw new DataValidationException("Эта страна уже есть в базе");
             } else {
-                error = exception.getMessage();
+                throw new DataValidationException("Неизвестная ошибка");
             }
-            Map<String, String> map = new HashMap<>();
-            map.put("error", error + "\n");
-            return ResponseEntity.ok(map);
         }
+    }
+
+    @PostMapping("/deleteartists")
+    public ResponseEntity deleteArtists(@Validated @RequestBody List<Artists> artists) {
+        artistsRepository.deleteAll(artists);
+        return new ResponseEntity(HttpStatus.OK);
     }
 
     /**
@@ -95,8 +106,8 @@ public class ArtistsController {
      * @return - возвращает заголовок. Если всё ок, то 200. Иначе будет ошибка
      */
     @PutMapping("/artists/{id}")
-    public ResponseEntity<Artists> updateCountry(@PathVariable(value = "id") Long artistsID,
-                                                 @RequestBody Artists artistDetails) {
+    public ResponseEntity<Artists> updateArtist(@PathVariable(value = "id") Long artistsID,
+                                                @RequestBody Artists artistDetails) {
         Artists artist = null;
         Optional<Artists> cc = artistsRepository.findById(artistsID);
         if (cc.isPresent()) {
@@ -119,7 +130,7 @@ public class ArtistsController {
      * @return - вернёт 200, если всё было ок
      */
     @DeleteMapping("/artists/{id}")
-    public ResponseEntity<Object> deleteCountry(@PathVariable(value = "id") Long artistID) {
+    public ResponseEntity<Object> deleteArtist(@PathVariable(value = "id") Long artistID) {
         Optional<Artists> artists = artistsRepository.findById(artistID);
         Map<String, Boolean> resp = new HashMap<>();
         // Возвратит true, если объект существует (не пустой)
